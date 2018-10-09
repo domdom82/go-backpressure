@@ -47,7 +47,7 @@ func (srv *Server) Run() {
 
 	for {
 		msg, _ := bufio.NewReaderSize(conn, srv.config.Bufsize).ReadBytes('\n')
-		fmt.Println(string(msg))
+		fmt.Print(string(msg))
 		time.Sleep(srv.config.Delay * time.Millisecond)
 	}
 }

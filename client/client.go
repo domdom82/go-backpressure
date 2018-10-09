@@ -20,6 +20,7 @@ type Config struct {
 	ServerPort        string `yaml:"server_port"`
 	PayloadSize       int    `yaml:"payload_size"`
 	RequestsPerSecond int    `yaml:"requests_per_second"`
+	RequestsTotal     int    `yaml:"requests_total"`
 }
 
 type Client struct {
@@ -59,15 +60,32 @@ func (c *Client) makePayload(size int) []byte {
 func (c *Client) Run() {
 	rand.Seed(time.Now().Unix())
 
+	timePerRequest := time.Duration(1.0 / float64(c.config.RequestsPerSecond) * float64(time.Second))
+	expectedTotalTime := time.Duration(float64(c.config.RequestsTotal) / float64(c.config.RequestsPerSecond) * float64(time.Second))
+
 	conn, err := net.Dial("tcp", fmt.Sprintf("%s:%s", c.config.ServerAddr, c.config.ServerPort))
 	if err != nil {
 		panic(err)
 	}
 
 	w := bufio.NewWriterSize(conn, c.config.PayloadSize)
-	for {
+	tStart := time.Now()
+	r := 1
+	for ; r < c.config.RequestsTotal; r++ {
+		fmt.Printf("req: %d\n", r)
+		reqStart := time.Now()
 		payload := c.makePayload(c.config.PayloadSize)
 		w.Write(payload)
 		fmt.Fprintf(conn, "\n")
+		reqStop := time.Now()
+		requestTime := reqStop.Sub(reqStart)
+		if requestTime < timePerRequest {
+			time.Sleep(timePerRequest - requestTime)
+		}
 	}
+	tEnd := time.Now()
+	actualTotalTime := tEnd.Sub(tStart)
+
+	fmt.Printf("\nFired %d requests in %s\n", r, actualTotalTime)
+	fmt.Printf("Expected: %d requests in %s\n", c.config.RequestsTotal, expectedTotalTime)
 }
