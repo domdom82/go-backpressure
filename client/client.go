@@ -72,10 +72,14 @@ func (c *Client) Run() {
 	tStart := time.Now()
 	r := 1
 	for ; r < c.config.RequestsTotal; r++ {
-		fmt.Printf("req: %d\n", r)
 		reqStart := time.Now()
 		payload := c.makePayload(c.config.PayloadSize)
-		w.Write(payload)
+		bytes, err := w.Write(payload)
+		fmt.Printf("req: %d (wrote %d bytes)", r, bytes)
+		if err != nil {
+			fmt.Printf("(%s)", err)
+		}
+		fmt.Println()
 		fmt.Fprintf(conn, "\n")
 		reqStop := time.Now()
 		requestTime := reqStop.Sub(reqStart)
