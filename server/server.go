@@ -3,36 +3,35 @@ package server
 import (
 	"bufio"
 	"fmt"
-	"time"
-	"net"
 	"io/ioutil"
+	"net"
+	"time"
+
 	"gopkg.in/yaml.v2"
 )
 
-
-type ServerConfig struct {
-	Port string 		`yaml:"port"`
-	Bufsize int 		`yaml:"bufsize"`
-	Delay time.Duration	`yaml:"delay"`
+type Config struct {
+	Port    string        `yaml:"port"`
+	Bufsize int           `yaml:"bufsize"`
+	Delay   time.Duration `yaml:"delay"`
 }
 
 type Server struct {
-	config *ServerConfig
+	config *Config
 }
 
-
-func (cfg *ServerConfig) NewServer() *Server {
-	server := &Server{ config: cfg}
+func (cfg *Config) NewServer() *Server {
+	server := &Server{config: cfg}
 
 	return server
 }
 
-func NewServerConfigFromFile(filename string) (*ServerConfig, error) {
+func NewServerConfigFromFile(filename string) (*Config, error) {
 	data, err := ioutil.ReadFile(filename)
 	if err != nil {
 		return nil, err
 	}
-	var config *ServerConfig
+	var config *Config
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		return nil, err
@@ -40,7 +39,6 @@ func NewServerConfigFromFile(filename string) (*ServerConfig, error) {
 
 	return config, nil
 }
-
 
 // sync
 func (srv *Server) Run() {

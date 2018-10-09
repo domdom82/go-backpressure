@@ -1,27 +1,42 @@
 package main
 
 import (
-	"os"
 	"fmt"
+	"os"
+
+	"github.com/domdom82/go-backpressure/client"
 	"github.com/domdom82/go-backpressure/server"
 )
 
 func main() {
-	var sconfig *server.ServerConfig
-	//var cconfig *client.ClientConfig
-	if len(os.Args) > 1 {
-		fmt.Printf("Loading sconfig from %q\n", os.Args[1])
-		s, err := server.NewServerConfigFromFile(os.Args[1])
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(1)
-		}
-		sconfig = s
-	} else {
-		fmt.Printf("ERROR: No configuration file provided.\nUsage: %s <-client|-server> <configfile>", os.Args[0])
+
+	usage := func() {
+		fmt.Printf("Usage: %s <-client|-server> <configfile>\n", os.Args[0])
 		os.Exit(1)
 	}
 
-	fmt.Printf("Starting the server.\n")
-	sconfig.NewServer().Run()
+	if len(os.Args) > 2 {
+		if os.Args[1] == "-server" {
+			fmt.Printf("Loading server config from %q\n", os.Args[2])
+			s, err := server.NewServerConfigFromFile(os.Args[2])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			fmt.Printf("Starting the server.\n")
+			s.NewServer().Run()
+		} else if os.Args[1] == "-client" {
+			fmt.Printf("Loading client config from %q\n", os.Args[2])
+			c, err := client.NewClientConfigFromFile(os.Args[2])
+			if err != nil {
+				fmt.Println(err)
+				os.Exit(1)
+			}
+			fmt.Printf("Starting the client.\n")
+			c.NewClient().Run()
+		}
+	} else {
+		usage()
+	}
+
 }
