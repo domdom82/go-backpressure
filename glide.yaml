@@ -1,0 +1,3 @@
+package: github.com/domdom82/go-backpressure
+import:
+- package: gopkg.in/yaml.v2
