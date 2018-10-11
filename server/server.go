@@ -44,10 +44,15 @@ func NewServerConfigFromFile(filename string) (*Config, error) {
 func (srv *Server) Run() {
 	listener, _ := net.Listen("tcp", fmt.Sprintf(":%s", srv.config.Port))
 	conn, _ := listener.Accept()
-
+	buf := make([]byte, srv.config.Bufsize)
 	for {
-		msg, _ := bufio.NewReaderSize(conn, srv.config.Bufsize).ReadBytes('\n')
-		fmt.Print(string(msg))
+
+		nbytes, err := bufio.NewReaderSize(conn, srv.config.Bufsize).Read(buf)
+		fmt.Printf("read %d bytes", nbytes)
+		if err != nil {
+			fmt.Printf(" (%s)", err)
+		}
+		fmt.Println()
 		time.Sleep(srv.config.Delay * time.Millisecond)
 	}
 }
