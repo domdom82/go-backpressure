@@ -32,16 +32,15 @@ func (srv *WsServer) handleDefault(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		panic(err)
 	}
+	_, reader, err := conn.NextReader()
+	if err != nil {
+		panic(err)
+	}
 
 	defer conn.Close()
 	buf := make([]byte, srv.config.Bufsize)
 
 	for {
-		_, reader, err := conn.NextReader()
-		if err != nil {
-			panic(err)
-		}
-
 		nbytes, err := bufio.NewReaderSize(reader, srv.config.Bufsize).Read(buf)
 		fmt.Printf("read %d bytes", nbytes)
 		if err != nil {

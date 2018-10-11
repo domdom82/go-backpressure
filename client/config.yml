@@ -1,4 +1,5 @@
 ---
+protocol: websocket
 server_addr: localhost
 server_port: 1234
 payload_size: 1500

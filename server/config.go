@@ -8,23 +8,23 @@ import (
 )
 
 type Config struct {
-	Port    string        `yaml:"port"`
-	Bufsize int           `yaml:"bufsize"`
-	Type    string        `yaml:"type"`
-	Delay   time.Duration `yaml:"delay"`
+	Protocol string        `yaml:"protocol"`
+	Port     string        `yaml:"port"`
+	Bufsize  int           `yaml:"bufsize"`
+	Delay    time.Duration `yaml:"delay"`
 }
 
 func (cfg *Config) NewServer() Server {
 
 	var server Server
 
-	switch cfg.Type {
+	switch cfg.Protocol {
 	case "tcp":
 		server = &TcpServer{config: cfg}
 	case "websocket":
 		server = &WsServer{config: cfg}
 	default:
-		panic("Expected type of tcp or websocket.")
+		panic("Expected protocol of type tcp or websocket.")
 	}
 
 	return server
