@@ -1,4 +1,5 @@
 ---
+type: tcp
 port: 1234
 bufsize: 1500
 delay: 1000
