@@ -27,11 +27,12 @@ func (c *TcpClient) Run() {
 	if err != nil {
 		panic(err)
 	}
+	defer conn.Close()
 
 	w := bufio.NewWriterSize(conn, c.config.PayloadSize)
 	tStart := time.Now()
 	r := 1
-	for ; r < c.config.RequestsTotal; r++ {
+	for ; r <= c.config.RequestsTotal; r++ {
 		reqStart := time.Now()
 		payload := makePayload(c.config.PayloadSize)
 		nbytes, err := w.Write(payload)
@@ -49,6 +50,6 @@ func (c *TcpClient) Run() {
 	tEnd := time.Now()
 	actualTotalTime := tEnd.Sub(tStart)
 
-	fmt.Printf("\nFired %d requests in %s\n", r, actualTotalTime)
+	fmt.Printf("\nFired %d requests in %s\n", r-1, actualTotalTime)
 	fmt.Printf("Expected: %d requests in %s\n", c.config.RequestsTotal, expectedTotalTime)
 }
