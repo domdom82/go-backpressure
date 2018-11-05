@@ -23,7 +23,7 @@ func (c *WsClient) Run() {
 	timePerRequest := time.Duration(1.0 / float64(c.config.RequestsPerSecond) * float64(time.Second))
 	expectedTotalTime := time.Duration(float64(c.config.RequestsTotal) / float64(c.config.RequestsPerSecond) * float64(time.Second))
 
-	conn, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("ws://%s:%s", c.config.ServerAddr, c.config.ServerPort), nil)
+	conn, _, err := websocket.DefaultDialer.Dial(fmt.Sprintf("ws://%s:%s/ws", c.config.ServerAddr, c.config.ServerPort), nil)
 	if err != nil {
 		panic(err)
 	}
@@ -35,7 +35,7 @@ func (c *WsClient) Run() {
 	w := bufio.NewWriterSize(writer, c.config.PayloadSize)
 	tStart := time.Now()
 	r := 1
-	for ; r < c.config.RequestsTotal; r++ {
+	for ; r <= c.config.RequestsTotal; r++ {
 		reqStart := time.Now()
 		payload := makePayload(c.config.PayloadSize)
 		nbytes, err := w.Write(payload)
@@ -50,9 +50,10 @@ func (c *WsClient) Run() {
 			time.Sleep(timePerRequest - requestTime)
 		}
 	}
+	conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
 	tEnd := time.Now()
 	actualTotalTime := tEnd.Sub(tStart)
 
-	fmt.Printf("\nFired %d requests in %s\n", r, actualTotalTime)
+	fmt.Printf("\nFired %d requests in %s\n", r-1, actualTotalTime)
 	fmt.Printf("Expected: %d requests in %s\n", c.config.RequestsTotal, expectedTotalTime)
 }

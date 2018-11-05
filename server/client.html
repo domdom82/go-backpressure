@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>WebSocket Client</title>
+</head>
+<body>
+<div>
+    Going to send random binary to <span id="ls"/>
+</div>
+<div>
+    <label>Payload Size</label>
+    <input id="iPayload" type="number" value="1500">
+</div>
+<div>
+    <label>Requests per Second</label>
+    <input id="iReqPerSecond" type="number" value="1">
+</div>
+<div>
+    <label>Total Requests</label>
+    <input id="iTotalRequests" type="number" value="5">
+</div>
+<div>
+    <button type="button" onclick="connect()">Start</button>
+</div>
+</body>
+
+<script>
+    var ls = document.getElementById("ls");
+    var l = window.location;
+    ls.innerText = "ws://" + l.host + "/ws";
+
+    var payloadSize;
+    var requestsPerSecond;
+    var requestsTotal;
+    var requestsSent = 0;
+    var throttleTime = 0;
+    var timePerRequest;
+
+    var makePayload = function(size) {
+        var buffer = new Uint8Array(size);
+        for (var i=0;i<size;i++) {
+            buffer[i] = Math.floor(Math.random() * 255)
+        }
+        return buffer
+    };
+
+    var sendPayload = function() {
+        requestsSent++;
+        throttleTime = 0;
+        if (requestsSent > requestsTotal) {
+            console.log("Done.");
+            ws.close();
+            return
+        }
+        console.log("Sending message " + requestsSent + "/" + requestsTotal);
+        var reqStart = Date.now();
+        var data = makePayload(payloadSize);
+        ws.send(data.buffer);
+        var reqStop = Date.now();
+        var requestTime = reqStop - reqStart;
+        console.log("Message sent. (Queued: " + ws.bufferedAmount + " bytes)");
+        if (ws.bufferedAmount > payloadSize) {
+            // poor man's back pressure
+            throttleTime = ws.bufferedAmount - payloadSize;
+            console.log("Throttling by " + throttleTime + " msec")
+        }
+        setTimeout(sendPayload, Math.max(0, (timePerRequest - requestTime) + throttleTime))
+    };
+
+    var connect = function() {
+        payloadSize = document.getElementById("iPayload").value;
+        requestsPerSecond = document.getElementById("iReqPerSecond").value;
+        requestsTotal = document.getElementById("iTotalRequests").value;
+        timePerRequest = (1.0 / requestsPerSecond) * 1000.0;
+        ws = new WebSocket(ls.innerText);
+        ws.onopen = function() {
+            requestsSent = 0;
+            sendPayload();
+        }
+    }
+</script>
+
+</html>
