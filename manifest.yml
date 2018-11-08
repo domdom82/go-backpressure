@@ -1,0 +1,7 @@
+---
+applications:
+- name: go-backpressure
+  memory: 128M
+  instances: 1
+  path: .
+  command: go-backpressure -server server/config.yml
