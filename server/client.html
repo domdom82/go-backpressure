@@ -28,7 +28,7 @@
 <script>
     var ls = document.getElementById("ls");
     var l = window.location;
-    ls.innerText = "ws://" + l.host + "/ws";
+    ls.innerText = "wss://" + l.host + "/ws";
 
     var payloadSize;
     var requestsPerSecond;
@@ -62,7 +62,7 @@
         console.log("Message sent. (Queued: " + ws.bufferedAmount + " bytes)");
         if (ws.bufferedAmount > payloadSize) {
             // poor man's back pressure
-            throttleTime = ws.bufferedAmount - payloadSize;
+            throttleTime = (ws.bufferedAmount - payloadSize) / 2;
             console.log("Throttling by " + throttleTime + " msec")
         }
         setTimeout(sendPayload, Math.max(0, (timePerRequest - requestTime) + throttleTime))
