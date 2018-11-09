@@ -2,6 +2,7 @@ package server
 
 import (
 	"io/ioutil"
+	"os"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -39,6 +40,12 @@ func NewServerConfigFromFile(filename string) (*Config, error) {
 	err = yaml.Unmarshal(data, &config)
 	if err != nil {
 		return nil, err
+	}
+
+	// Overwrite port if given by ENV
+	envPort := os.Getenv("PORT")
+	if envPort != "" {
+		config.Port = envPort
 	}
 
 	return config, nil
