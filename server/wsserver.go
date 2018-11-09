@@ -50,6 +50,8 @@ func (srv *WsServer) HandleConn(conn *websocket.Conn) {
 
 		if msgType == websocket.BinaryMessage {
 			fmt.Printf("read %d bytes\n", len(buf))
+		} else if msgType == websocket.TextMessage {
+			fmt.Printf("read text message: %v \n", buf)
 		} else if msgType == websocket.CloseMessage {
 			fmt.Println("Received close message. Closing connection.")
 			break
