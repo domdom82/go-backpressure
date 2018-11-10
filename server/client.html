@@ -28,7 +28,11 @@
 <script>
     var ls = document.getElementById("ls");
     var l = window.location;
-    ls.innerText = "wss://" + l.host + "/ws";
+    if (l.protocol === "https:") {
+        ls.innerText = "wss://" + l.host + "/ws";
+    } else {
+        ls.innerText = "ws://" + l.host + "/ws";
+    }
 
     var payloadSize;
     var requestsPerSecond;
