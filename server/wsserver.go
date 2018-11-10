@@ -59,9 +59,7 @@ func (srv *WsServer) HandleConn(conn *websocket.Conn) {
 
 		if err != nil {
 			fmt.Printf("%s\n", err)
-			if websocket.IsCloseError(err, websocket.CloseAbnormalClosure, websocket.CloseNoStatusReceived) {
-				break
-			}
+			break
 		}
 		time.Sleep(srv.config.Delay * time.Millisecond)
 	}
