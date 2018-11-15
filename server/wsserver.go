@@ -20,7 +20,10 @@ type WsServer struct {
 func (srv *WsServer) Run() {
 	fmt.Println("Starting web socket server on port", srv.config.Port)
 
-	srv.upgrader = websocket.Upgrader{}
+	srv.upgrader = websocket.Upgrader{
+		ReadBufferSize:  srv.config.Bufsize,
+		WriteBufferSize: srv.config.Bufsize,
+	}
 	srv.setupClientTemplate()
 
 	http.HandleFunc("/ws", srv.handleDefault)
@@ -47,7 +50,6 @@ func (srv *WsServer) HandleConn(conn *websocket.Conn) {
 
 	for {
 		msgType, buf, err := conn.ReadMessage()
-
 		if msgType == websocket.BinaryMessage {
 			fmt.Printf("read %d bytes\n", len(buf))
 		} else if msgType == websocket.TextMessage {
