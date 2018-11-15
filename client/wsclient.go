@@ -26,6 +26,10 @@ func (c *WsClient) Run() {
 		panic(err)
 	}
 	defer conn.Close()
+
+	// Tell the server how much we are going to send
+	conn.WriteJSON(ConnectionParams{PayloadSize: c.config.PayloadSize, RequestsTotal: c.config.RequestsTotal})
+
 	tStart := time.Now()
 	r := 1
 	for ; r <= c.config.RequestsTotal; r++ {

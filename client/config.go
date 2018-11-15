@@ -15,6 +15,11 @@ type Config struct {
 	RequestsTotal     int    `yaml:"requests_total"`
 }
 
+type ConnectionParams struct {
+	PayloadSize   int `json:"payloadSize"`
+	RequestsTotal int `json:"requestsTotal"`
+}
+
 func (cfg *Config) NewClient() Client {
 	var client Client
 

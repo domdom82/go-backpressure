@@ -72,14 +72,23 @@
         setTimeout(sendPayload, Math.max(0, (timePerRequest - requestTime) + throttleTime))
     };
 
+    var sendConnectionParams = function() {
+        var cp = {
+            payloadSize: payloadSize,
+            requestsTotal: requestsTotal
+        };
+        ws.send(JSON.stringify(cp))
+    };
+
     var connect = function() {
-        payloadSize = document.getElementById("iPayload").value;
-        requestsPerSecond = document.getElementById("iReqPerSecond").value;
-        requestsTotal = document.getElementById("iTotalRequests").value;
+        payloadSize = document.getElementById("iPayload").value * 1;
+        requestsPerSecond = document.getElementById("iReqPerSecond").value * 1;
+        requestsTotal = document.getElementById("iTotalRequests").value * 1;
         timePerRequest = (1.0 / requestsPerSecond) * 1000.0;
         ws = new WebSocket(ls.innerText);
         ws.onopen = function() {
             requestsSent = 0;
+            sendConnectionParams();
             sendPayload();
         }
     }

@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/domdom82/go-backpressure/client"
+
 	"github.com/gorilla/websocket"
 )
 
@@ -48,12 +50,26 @@ func (srv *WsServer) HandleConn(conn *websocket.Conn) {
 
 	defer conn.Close()
 
+	// We expect the client to tell us how much he'll send us
+	cp := client.ConnectionParams{}
+	err := conn.ReadJSON(&cp)
+
+	if err != nil {
+		fmt.Printf("error: Expected connection params but got: %v\n", err)
+		return
+	}
+
+	bytesTotal := cp.RequestsTotal * cp.PayloadSize
+	bytesRead := 0
+
 	for {
 		msgType, buf, err := conn.ReadMessage()
 		if msgType == websocket.BinaryMessage {
-			fmt.Printf("read %d bytes\n", len(buf))
+			bytesRead += len(buf)
+			completedPercent := float64(bytesRead) / float64(bytesTotal) * 100.0
+			fmt.Printf("read %d bytes (%d / %d bytes total %.2f%%)\n", len(buf), bytesRead, bytesTotal, completedPercent)
 		} else if msgType == websocket.TextMessage {
-			fmt.Printf("read text message: %v \n", buf)
+			fmt.Printf("read text message: %v \n", string(buf))
 		} else if msgType == websocket.CloseMessage {
 			fmt.Println("Received close message. Closing connection.")
 			break
