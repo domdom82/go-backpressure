@@ -7,7 +7,7 @@ ENV PATH "${PATH}:$GOROOT/bin"
 ENV PORT 8080
 
 RUN apt-get update && \
-    apt-get install -y golang-1.10-go
+    apt-get install -y golang-1.10-go iproute2
 
 COPY . "${GOROOT}/src/github.com/domdom82/go-backpressure"
 
