@@ -5,8 +5,6 @@ import (
 	"math/rand"
 	"time"
 
-	"bufio"
-
 	"github.com/gorilla/websocket"
 )
 
@@ -28,18 +26,13 @@ func (c *WsClient) Run() {
 		panic(err)
 	}
 	defer conn.Close()
-	writer, err := conn.NextWriter(websocket.BinaryMessage)
-	if err != nil {
-		panic(err)
-	}
-	w := bufio.NewWriterSize(writer, c.config.PayloadSize)
 	tStart := time.Now()
 	r := 1
 	for ; r <= c.config.RequestsTotal; r++ {
 		reqStart := time.Now()
 		payload := makePayload(c.config.PayloadSize)
-		nbytes, err := w.Write(payload)
-		fmt.Printf("req: %d (wrote %d bytes)", r, nbytes)
+		err := conn.WriteMessage(websocket.BinaryMessage, payload)
+		fmt.Printf("req: %d (wrote %d bytes)", r, c.config.PayloadSize)
 		if err != nil {
 			fmt.Printf(" (%s)", err)
 		}
