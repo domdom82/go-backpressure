@@ -26,6 +26,7 @@
 </body>
 
 <script>
+    var numSockets = 0;
     var ls = document.getElementById("ls");
     var l = window.location;
     if (l.protocol === "https:") {
@@ -33,13 +34,6 @@
     } else {
         ls.innerText = "ws://" + l.host + "/ws";
     }
-
-    var payloadSize;
-    var requestsPerSecond;
-    var requestsTotal;
-    var requestsSent = 0;
-    var throttleTime = 0;
-    var timePerRequest;
 
     var makePayload = function(size) {
         var buffer = new Uint8Array(size);
@@ -49,45 +43,50 @@
         return buffer
     };
 
-    var sendPayload = function() {
-        requestsSent++;
-        throttleTime = 0;
-        if (requestsSent > requestsTotal) {
-            console.log("Done.");
-            ws.close();
-            return
-        }
-        console.log("Sending message " + requestsSent + "/" + requestsTotal);
-        var reqStart = Date.now();
-        var data = makePayload(payloadSize);
-        ws.send(data.buffer);
-        var reqStop = Date.now();
-        var requestTime = reqStop - reqStart;
-        console.log("Message sent. (Queued: " + ws.bufferedAmount + " bytes)");
-        if (ws.bufferedAmount > payloadSize) {
-            // poor man's back pressure
-            throttleTime = (ws.bufferedAmount - payloadSize) / 2;
-            console.log("Throttling by " + throttleTime + " msec")
-        }
-        setTimeout(sendPayload, Math.max(0, (timePerRequest - requestTime) + throttleTime))
-    };
-
-    var sendConnectionParams = function() {
-        var cp = {
-            payloadSize: payloadSize,
-            requestsTotal: requestsTotal
-        };
-        ws.send(JSON.stringify(cp))
-    };
-
     var connect = function() {
-        payloadSize = document.getElementById("iPayload").value * 1;
-        requestsPerSecond = document.getElementById("iReqPerSecond").value * 1;
-        requestsTotal = document.getElementById("iTotalRequests").value * 1;
-        timePerRequest = (1.0 / requestsPerSecond) * 1000.0;
-        ws = new WebSocket(ls.innerText);
+        var ws = new WebSocket(ls.innerText);
         ws.onopen = function() {
-            requestsSent = 0;
+            numSockets++;
+            var numSocket = numSockets;
+            var payloadSize = document.getElementById("iPayload").value * 1;
+            var requestsPerSecond = document.getElementById("iReqPerSecond").value * 1;
+            var requestsTotal = document.getElementById("iTotalRequests").value * 1;
+            var timePerRequest = (1.0 / requestsPerSecond) * 1000.0;
+            var requestsSent = 0;
+            var throttleTime = 0;
+
+            var sendPayload = function() {
+                requestsSent++;
+                throttleTime = 0;
+                if (requestsSent > requestsTotal) {
+                    console.log("("+numSocket+") Done.");
+                    ws.close();
+                    return
+                }
+                console.log("("+numSocket+") Sending message " + requestsSent + "/" + requestsTotal);
+                var reqStart = Date.now();
+                var data = makePayload(payloadSize);
+                ws.send(data.buffer);
+                var reqStop = Date.now();
+                var requestTime = reqStop - reqStart;
+                console.log("("+numSocket+") Message sent. (Queued: " + ws.bufferedAmount + " bytes)");
+                if (ws.bufferedAmount > payloadSize) {
+                    // poor man's back pressure
+                    throttleTime = (ws.bufferedAmount - payloadSize) / 2;
+                    console.log("("+numSocket+") Throttling by " + throttleTime + " msec")
+                }
+                setTimeout(sendPayload, Math.max(0, (timePerRequest - requestTime) + throttleTime))
+            };
+
+            var sendConnectionParams = function() {
+                var cp = {
+                    payloadSize: payloadSize,
+                    requestsTotal: requestsTotal
+                };
+                ws.send(JSON.stringify(cp))
+            };
+
+
             sendConnectionParams();
             sendPayload();
         }
