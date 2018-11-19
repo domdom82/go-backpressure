@@ -67,7 +67,7 @@ func (srv *WsServer) HandleConn(conn *websocket.Conn) {
 		if msgType == websocket.BinaryMessage {
 			bytesRead += len(buf)
 			completedPercent := float64(bytesRead) / float64(bytesTotal) * 100.0
-			fmt.Printf("read %d bytes (%d / %d bytes total %.2f%%)\n", len(buf), bytesRead, bytesTotal, completedPercent)
+			fmt.Printf("%s : read %d bytes (%d / %d bytes total %.2f%%)\n", conn.RemoteAddr(), len(buf), bytesRead, bytesTotal, completedPercent)
 		} else if msgType == websocket.TextMessage {
 			fmt.Printf("read text message: %v \n", string(buf))
 		} else if msgType == websocket.CloseMessage {
@@ -76,7 +76,7 @@ func (srv *WsServer) HandleConn(conn *websocket.Conn) {
 		}
 
 		if err != nil {
-			fmt.Printf("%s\n", err)
+			fmt.Printf("%s : %s\n", conn.RemoteAddr(), err)
 			break
 		}
 		time.Sleep(srv.config.Delay * time.Millisecond)
