@@ -54,13 +54,17 @@
             var timePerRequest = (1.0 / requestsPerSecond) * 1000.0;
             var requestsSent = 0;
             var throttleTime = 0;
+            var startTime = Date.now();
+            var stopTime, totalTime;
 
             var sendPayload = function() {
                 requestsSent++;
                 throttleTime = 0;
                 if (requestsSent > requestsTotal) {
-                    console.log("("+numSocket+") Done.");
                     ws.close();
+                    stopTime = Date.now();
+                    totalTime = stopTime - startTime;
+                    console.log("("+numSocket+") Done. Took " + totalTime / 1000 + " seconds.");
                     return
                 }
                 console.log("("+numSocket+") Sending message " + requestsSent + "/" + requestsTotal);
