@@ -1,7 +1,7 @@
 ---
 protocol: websocket
 server_addr: localhost
-server_port: 1234
+server_port: 8080
 payload_size: 1000
 requests_per_second: 1
 requests_total: 5

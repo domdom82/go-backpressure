@@ -1,5 +1,5 @@
 ---
 protocol: websocket
-port: 1234
+port: 8080
 bufsize: 1000
 delay: 1000
